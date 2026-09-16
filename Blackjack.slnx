@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="Blackjack.Application.Tests/Blackjack.Application.Tests.csproj" />
+  <Project Path="Blackjack.Application/Blackjack.Application.csproj" />
+  <Project Path="Blackjack.Domain.Tests/Blackjack.Domain.Tests.csproj" />
+  <Project Path="Blackjack.Domain/Blackjack.Domain.csproj" />
+  <Project Path="Blackjack.Infrastructure.Tests/Blackjack.Infrastructure.Tests.csproj" />
+  <Project Path="Blackjack.Infrastructure/Blackjack.Infrastructure.csproj" />
+  <Project Path="Blackjack.Wpf/Blackjack.Wpf.csproj" />
+</Solution>
