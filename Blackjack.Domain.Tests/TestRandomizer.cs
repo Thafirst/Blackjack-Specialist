@@ -9,7 +9,7 @@ namespace Blackjack.Domain.Tests
     {
         public int Next(int maxValue)
         {
-            return 0;
+            return maxValue-1;
         }
     }
 }

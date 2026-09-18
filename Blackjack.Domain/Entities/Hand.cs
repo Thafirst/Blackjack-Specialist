@@ -49,5 +49,6 @@ namespace Blackjack.Domain.Entities
 
                 return value;
             } }
+
     }
 }

@@ -22,6 +22,12 @@ namespace Blackjack.Domain.Entities
             }
         }
 
+        public Deck(IRandomizer randomizer, IEnumerable<Card> cards)
+        {
+            _randomizer = randomizer;
+            _cards.AddRange(cards);
+        }
+
         public Card DrawCard()
         {
             if (_cards.Count == 0)
