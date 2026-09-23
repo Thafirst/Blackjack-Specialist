@@ -1,4 +1,4 @@
-﻿using Blackjack.Application;
+﻿using Blackjack.Application.Services;
 using Blackjack.Domain.Entities;
 using Blackjack.Domain.Enums;
 using Blackjack.Domain.Results;

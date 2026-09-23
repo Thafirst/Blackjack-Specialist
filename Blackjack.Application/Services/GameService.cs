@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Blackjack.Application
+namespace Blackjack.Application.Services
 {
     public class GameService
     {
