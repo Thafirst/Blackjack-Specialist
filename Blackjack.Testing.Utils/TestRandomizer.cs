@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Blackjack.Domain.Tests
+namespace Blackjack.Testing.Utils
 {
     public class TestRandomizer : IRandomizer
     {

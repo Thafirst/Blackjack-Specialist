@@ -1,5 +1,6 @@
 ﻿using Blackjack.Domain.Entities;
 using Blackjack.Domain.Enums;
+using Blackjack.Testing.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -211,7 +212,7 @@ namespace Blackjack.Domain.Tests
 
             game.StartGame();
 
-            Assert.Throws<InvalidOperationException>(() => game.Hit());
+            Assert.Throws<InvalidOperationException>(game.Hit);
         }
 
         [Fact]
@@ -223,7 +224,7 @@ namespace Blackjack.Domain.Tests
 
             BlackjackGame game = new BlackjackGame(player, dealer, deck);
 
-            Assert.Throws<InvalidOperationException>(() => game.Stand());
+            Assert.Throws<InvalidOperationException>(game.Stand);
         }
         
 
@@ -437,6 +438,32 @@ namespace Blackjack.Domain.Tests
             game.PlayDealerTurn();
 
             game.DetermineResult();
+
+            Assert.Equal(GameState.Finished, game.State);
+            Assert.Equal(GameResult.DealerWins, game.Result);
+        }
+
+        [Fact]
+        public void DetermineResult_ShouldReturnDealerWins_WhenPlayerBust()
+        {
+            List<Card> cards =
+            [
+                new Card(Suit.Hearts, Rank.Queen),
+                new Card(Suit.Diamonds, Rank.Seven),
+                new Card(Suit.Hearts, Rank.Queen),
+                new Card(Suit.Hearts, Rank.Queen),
+                new Card(Suit.Diamonds, Rank.Queen)
+            ];
+
+            Player player = new Player("Nicholai");
+            Dealer dealer = new Dealer();
+            Deck deck = new Deck(new TestRandomizer(), cards);
+
+            BlackjackGame game = new BlackjackGame(player, dealer, deck);
+
+            game.StartGame();
+
+            game.Hit();
 
             Assert.Equal(GameState.Finished, game.State);
             Assert.Equal(GameResult.DealerWins, game.Result);

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Blackjack.Infrastructure\Blackjack.Infrastructure.csproj" />
+    <ProjectReference Include="..\Blackjack.Testing.Utils\Blackjack.Testing.Utils.csproj" />
   </ItemGroup>
 
   <ItemGroup>
