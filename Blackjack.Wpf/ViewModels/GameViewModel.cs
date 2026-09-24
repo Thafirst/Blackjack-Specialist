@@ -13,12 +13,18 @@ namespace Blackjack.Wpf.ViewModels
     public class GameViewModel : INotifyPropertyChanged
     {
         private readonly GameService _gameService;
+        private readonly UserStatisticsService _userStatisticsService;
+        private int? _loggedInUserId;
+        
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<Card> PlayerCards { get; }
         public ObservableCollection<Card> DealerCards { get; }
         public ObservableCollection<Card> AdditionalDealerCards { get; }
+
+
+
         private string _gameStatus = "Game Not Started";
         public string GameStatus
         {
@@ -83,9 +89,10 @@ namespace Blackjack.Wpf.ViewModels
             }
         }
 
-        public GameViewModel(GameService gameService)
+        public GameViewModel(GameService gameService, UserStatisticsService userStatisticsService)
         {
             _gameService = gameService;
+            _userStatisticsService = userStatisticsService;
             PlayerCards = new ObservableCollection<Card>();
             DealerCards = new ObservableCollection<Card>();
             AdditionalDealerCards = new ObservableCollection<Card>();
@@ -118,6 +125,8 @@ namespace Blackjack.Wpf.ViewModels
                 GameStatus = "You got blackjack!";
                 CanStartGame = true;
                 IsPlayerTurn = false;
+
+                RecordWin();
             }
         }
 
@@ -134,6 +143,8 @@ namespace Blackjack.Wpf.ViewModels
                 GameStatus = "You Busted!";
                 CanStartGame = true;
                 IsPlayerTurn = false;
+
+                RecordLoss();
             }
         }
 
@@ -155,18 +166,114 @@ namespace Blackjack.Wpf.ViewModels
 
             GameResult results = _gameService.DetermineResult();
 
-            GameStatus = results switch
+            switch (results)
             {
-                GameResult.PlayerWins => "You win!",
-                GameResult.DealerWins => "Dealer win!",
-                GameResult.Push => "Push!",
-                _ => "Game Finished"
-            };
+                case GameResult.PlayerWins:
+                    GameStatus = "You win!";
+                    RecordWin();
+                    break;
+                case GameResult.DealerWins:
+                    GameStatus = "Dealer win!";
+                    RecordLoss();
+                    break;
+                case GameResult.Push:
+                    GameStatus = "Push!";
+                    RecordDraw();
+                    break;
+                default:
+                    GameStatus = "Game finished!";
+                    break;
+            }
+        }
+
+        public void SetLoggedInUserId(int? userId)
+        {
+            _loggedInUserId = userId;
+        }
+
+        private void RecordWin()
+        {
+            if (_loggedInUserId == null)
+                return;
+
+            _userStatisticsService.RecordWin(_loggedInUserId.Value);
+            Wins++;
+        }
+
+        private void RecordLoss()
+        {
+            if (_loggedInUserId == null)
+                return;
+
+            _userStatisticsService.RecordLoss(_loggedInUserId.Value);
+            Losses++;
+        }
+
+        private void RecordDraw()
+        {
+            if (_loggedInUserId == null)
+                return;
+
+            _userStatisticsService.RecordDraw(_loggedInUserId.Value);
+            Draws++;
+        }
+
+        private int _wins;
+        public int Wins
+        {
+            get => _wins;
+            private set
+            {
+                _wins = value;
+                OnPropertyChanged(nameof(Wins));
+            }
+        }
+
+        private int _losses;
+        public int Losses
+        {
+            get => _losses;
+            private set
+            {
+                _losses = value;
+                OnPropertyChanged(nameof(Losses));
+            }
+        }
+
+        private int _draws;
+        public int Draws
+        {
+            get => _draws;
+            private set
+            {
+                _draws = value;
+                OnPropertyChanged(nameof(Draws));
+            }
         }
 
         public void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public void LoadStatistics(int? userId)
+        {
+            _loggedInUserId = userId;
+
+            if (userId == null)
+            {
+                Wins = 0;
+                Losses = 0;
+                Draws = 0;
+                return;
+            }
+
+            UserStatistics statistics =
+                _userStatisticsService.GetOrCreate(userId.Value);
+
+            Wins = statistics.Wins;
+            Losses = statistics.Losses;
+            Draws = statistics.Draws;
         }
     }
 }

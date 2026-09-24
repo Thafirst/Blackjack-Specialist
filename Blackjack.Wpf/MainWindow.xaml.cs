@@ -25,6 +25,9 @@ namespace Blackjack.Wpf
     {
         public GameViewModel ViewModel { get; }
         public UserService UserService { get; }
+        public UserStatisticsService UserStatisticsService { get; }
+        private int? _loggedInUserId;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -32,11 +35,15 @@ namespace Blackjack.Wpf
             Randomizer randomizer = new Randomizer();
             GameService gameService = new GameService(randomizer);
 
-            ViewModel = new GameViewModel(gameService);
-
-            DataContext = ViewModel;
 
             BlackjackDbContext context = BlackjackDbContextFactory.Create();
+
+            UserStatisticsRepository userStatisticsRepository = new UserStatisticsRepository(context);
+            UserStatisticsService = new UserStatisticsService(userStatisticsRepository);
+
+            ViewModel = new GameViewModel(gameService, UserStatisticsService);
+
+            DataContext = ViewModel;
 
             context.Database.Migrate();
 
@@ -44,6 +51,7 @@ namespace Blackjack.Wpf
             BCryptPasswordHasher passwordHasher = new BCryptPasswordHasher();
             
             UserService = new UserService(userRepository, passwordHasher);
+
         }
 
         private void StartGame_Pressed(object sender, RoutedEventArgs e)
@@ -69,9 +77,17 @@ namespace Blackjack.Wpf
             bool loginSuccessful = UserService.Login(username, password);
 
             if (loginSuccessful)
-                LoginStatusText.Text = "Login Successful!";
+            {
+                _loggedInUserId = UserService.GetUserId(username);
+                ViewModel.LoadStatistics(_loggedInUserId);
+                LoginStatusText.Text = $"Login Successful as {username}!";
+            }
             else
+            {
+                _loggedInUserId = null;
+                ViewModel.LoadStatistics(null);
                 LoginStatusText.Text = "Invalid username or password.";
+            }
         }
 
         private void Register_Pressed(object sender, RoutedEventArgs e)
@@ -85,18 +101,28 @@ namespace Blackjack.Wpf
 
                 bool loginSuccessful = UserService.Login(username, password);
 
-                if(loginSuccessful)
+                if (loginSuccessful)
+                {
+                    _loggedInUserId = UserService.GetUserId(username);
+                    ViewModel.LoadStatistics(_loggedInUserId);
                     LoginStatusText.Text = $"Registration Successful, and logged in as {username}!";
+                }
             }
             catch (InvalidOperationException)
             {
+                _loggedInUserId = null;
+                ViewModel.LoadStatistics(null);
                 LoginStatusText.Text = "That username already exists.";
             }
             catch (ArgumentException)
             {
+                _loggedInUserId = null;
+                ViewModel.LoadStatistics(null);
                 LoginStatusText.Text = "Username or password fields cannot be empty.";
             }
 
         }
+
+
     }
 }

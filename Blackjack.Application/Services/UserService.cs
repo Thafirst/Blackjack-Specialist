@@ -54,5 +54,17 @@ namespace Blackjack.Application.Services
 
             return _passwordHasher.Verify(password,credentials.PasswordHash);
         }
+
+        public int? GetUserId(string username)
+        {
+            User? user = _userRepository.GetByUsername(username);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return user.Id;
+        }
     }
 }

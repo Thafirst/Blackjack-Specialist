@@ -206,5 +206,44 @@ namespace Blackjack.Application.Tests
 
             Assert.Throws<ArgumentException>(() => service.Register("Nicholai", "    "));
         }
+
+        [Fact]
+        public void GetUserId_ReturnsUserId_WhenUserExists()
+        {
+            TestUserRepository repository =
+                new TestUserRepository();
+
+            User user =
+                new User("TestUser");
+
+            repository.Add(user, new UserCredential(0, "password"));
+
+            UserService service =
+                new UserService(
+                    repository,
+                    new TestPasswordHasher());
+
+            int? userId =
+                service.GetUserId("TestUser");
+
+            Assert.Equal(user.Id, userId);
+        }
+
+        [Fact]
+        public void GetUserId_ReturnsNull_WhenUserDoesNotExist()
+        {
+            TestUserRepository repository =
+                new TestUserRepository();
+
+            UserService service =
+                new UserService(
+                    repository,
+                    new TestPasswordHasher());
+
+            int? userId =
+                service.GetUserId("UnknownUser");
+
+            Assert.Null(userId);
+        }
     }
 }
